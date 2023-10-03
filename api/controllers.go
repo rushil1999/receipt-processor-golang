@@ -9,6 +9,7 @@ import (
 	"receipt-processor-module/helpers"
 	"strconv"
 	"math"
+	"strings"
 )
 
 func GetAllReceipts(c *gin.Context) {
@@ -32,27 +33,36 @@ func GetReceiptPointsById(c *gin.Context) {
 	fmt.Println(receipt)
 	totalPoints := 0
 	totalPoints += helpers.CountAlphanumeric(receipt.Retailer)
+	fmt.Println("calc 0", totalPoints)
 	if helpers.IsRoundedDollarAmount(receipt.Total) {
 		totalPoints += 50
+		fmt.Println("calc 1", totalPoints)
 	}
 	if helpers.IsMultipleOfQuarter(receipt.Total){
 		totalPoints += 25
+		fmt.Println("calc 2", totalPoints)
 	}
-	totalPoints += 5*(len(receipt.Items)/2)
+	val := 5*(len(receipt.Items)/2)
+	totalPoints += val
+	fmt.Println("calc 3", totalPoints, val)
 	day := helpers.GetDayFromDate(receipt.PurchaseDate)
 	if(day % 2 ==1){
 		totalPoints += 6
+		fmt.Println("calc 4", totalPoints)
 	}
 	if helpers.IsTimeBetween2And4PM(receipt.PurchaseTime) {
 		totalPoints += 10
+		fmt.Println("calc 5", totalPoints)
 	}
 
 	for _, item := range receipt.Items {
-		trimmedDescription := item.ShortDescription
+		trimmedDescription := strings.TrimSpace(item.ShortDescription)
+		fmt.Println(trimmedDescription, len(trimmedDescription))
 		if len(trimmedDescription) % 3 ==0{
 			itemPrice, _ := strconv.ParseFloat(item.Price, 64)
 			points := math.Ceil(itemPrice*0.2)
 			totalPoints += int(points) 
+			fmt.Println("calc 6", totalPoints, points)
 		}
 	}
 	c.JSON(http.StatusCreated, gin.H{"points": totalPoints})

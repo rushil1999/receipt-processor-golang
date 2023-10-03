@@ -4,26 +4,27 @@ import (
 	"unicode"
 	"strconv"
 	"strings"
-	"regexp"
 	"time"
 	"fmt"
+	"math"
 )
 
 func IsTimeBetween2And4PM(inputTimeStr string) bool {
-	layout := "13:01"
-	inputTime, err := time.Parse(layout, inputTimeStr)
+	parsedTime, err := time.Parse("15:04", inputTimeStr)
 	if err != nil {
-			return false
+		return false
 	}
-	startTime := time.Date(0, 0, 0, 14, 0, 0, 0, time.UTC)
-	endTime := time.Date(0, 0, 0, 16, 0, 0, 0, time.UTC)
-	return inputTime.After(startTime) && inputTime.Before(endTime)
+	twoPM := time.Date(parsedTime.Year(), parsedTime.Month(), parsedTime.Day(), 14, 0, 0, 0, parsedTime.Location())
+	fourPM := time.Date(parsedTime.Year(), parsedTime.Month(), parsedTime.Day(), 16, 0, 0, 0, parsedTime.Location())
+	return parsedTime.After(twoPM) && parsedTime.Before(fourPM)
 }
 
 func IsRoundedDollarAmount(input string) bool {
-	pattern := `^\d+\.\d{2}$`
-	regex := regexp.MustCompile(pattern)
-	return regex.MatchString(input)
+	number, err := strconv.ParseFloat(input, 64)
+	if err != nil {
+		return false
+	}
+	return number == math.Trunc(number)
 }
 
 func IsMultipleOfQuarter(input string) bool {
