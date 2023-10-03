@@ -2,6 +2,7 @@ package models
 
 import ("github.com/google/uuid")
 
+// Added dummy data
 var Receipts = []Receipt {
 	{
 		ID: uuid.New().String(),
