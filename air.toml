@@ -1,0 +1,18 @@
+# air.toml
+
+# Entry point for your application
+[build]
+  cmd = "main"
+
+# Watch these file extensions for changes
+# Add any other file extensions or directories you want to monitor
+[build.watch]
+  dirs = ["."]
+
+# Exclude these file extensions from being monitored
+[build.exclude]
+  dirs = ["node_modules", "vendor"]
+
+# Environment variables (optional)
+[env]
+  PORT = "8000"
