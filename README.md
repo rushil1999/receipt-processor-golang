@@ -17,5 +17,9 @@
 * GET `/receipts`: Returns all the receipts in indented JSON
 * POST `/receipts/process`: Will take JSON body and return a JSON object with 1 key `id` depicting the id assigned to the receipt
 * GET `receipts/{id}/process`: Will return the points assigned to receipt
-  
+
+# Key Features
+* The project is well-organized and modular
+* Error Handling is added, so invalid input will returned with an appropriate error message
+* Points are stored with receipts. So once a receipt is calculated for points, it will NOT be re-calculated
    
