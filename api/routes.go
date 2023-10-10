@@ -10,4 +10,5 @@ func ImportRoutes(routerEngine *gin.Engine) {
 	routerEngine.GET("/receipts/:id/process", GetReceiptPointsById) //Route to calculate points in a receipt
 	routerEngine.PUT("/receipts/process", UpdateReceipt) //Router to update a receipt
 	routerEngine.GET("/receipt/:id", GetReceiptById) //Router to get receipt
+	routerEngine.DELETE("/receipt/:id", DeleteReceipt) //Router to get receipt
 }

@@ -23,6 +23,7 @@ func GetReceiptById(id string) (models.Receipt, int, error) {
 	return emptyReceipt, -1, errorInstance
 }
 
+
 func GetItemPoints(items []models.Item) (int, error) { 
 	totalPoints := 0
 	for _, item := range items { // Looping through all the items to get the points
@@ -102,4 +103,16 @@ func UpdateReceipt(updatedReceipt models.Receipt) (models.Receipt, error) {
 	receipt.Points = newReceiptPoints
 	models.Receipts[index] = receipt
 	return receipt, nil
+}
+
+func DeleteReceipt(id string) (string, error) {
+	_, idx, err := GetReceiptById(id)
+	if err != nil {
+		return "", err
+	}
+	before := models.Receipts[:idx]
+	after := models.Receipts[idx+1:]
+	models.Receipts = append(before, after...)
+	return id, nil
+
 }

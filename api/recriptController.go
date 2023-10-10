@@ -51,13 +51,6 @@ func GetReceiptPointsById(c *gin.Context)  { // Controller to get points for a r
 	c.JSON(http.StatusCreated, gin.H{"points": totalPoints}) // Seinding total points in JSON
 }
 
-func sendErrorResponse(c *gin.Context, message string){
-	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": message}) // Sending error response based on error received
-}
-func sendCustomErrorResponse(c * gin.Context, err error) {
-	customError := err.(models.CustomError)
-	c.IndentedJSON(customError.HttpCode, gin.H{"error": customError.Message})
-}
 
 func GetReceiptById(c *gin.Context) {
 	receiptId := c.Param("id")
@@ -81,4 +74,14 @@ func UpdateReceipt(c *gin.Context) { // Controller to update the receipt
 	}
 	c.IndentedJSON(http.StatusCreated, receipt)
 
+}
+
+func DeleteReceipt(c * gin.Context) {
+	id := c.Param("id")
+	deletedReceiptId, err := helpers.DeleteReceipt(id)
+	if err != nil {
+		sendCustomErrorResponse(c, err)
+		return
+	}
+	c.IndentedJSON(http.StatusCreated, gin.H{"recetipDeleteId": deletedReceiptId})
 }
