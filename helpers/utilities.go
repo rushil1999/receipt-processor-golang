@@ -6,37 +6,49 @@ import (
 	"strings"
 	"time"
 	"math"
-	"fmt"
+	"receipt-processor-module/models"
 )
 
-func IsTimeBetween2And4PM(inputTimeStr string) (bool, string) {
+func IsTimeBetween2And4PM(inputTimeStr string) (bool, error) {
 	parsedTime, err:= time.Parse("15:04", inputTimeStr)
-	errorMsg := "Invalid Purchase Time"
 	if err != nil {
-		return false, errorMsg
+		customError := models.CustomError {
+			Message: "Invalid Input",
+			DebugMessage: "Cannot parse float",
+			HttpCode: 404,
+		}
+		return false, customError
 	}
 	twoPM := time.Date(parsedTime.Year(), parsedTime.Month(), parsedTime.Day(), 14, 0, 0, 0, parsedTime.Location())
 	fourPM := time.Date(parsedTime.Year(), parsedTime.Month(), parsedTime.Day(), 16, 0, 0, 0, parsedTime.Location())
-	return parsedTime.After(twoPM) && parsedTime.Before(fourPM), ""
+	return parsedTime.After(twoPM) && parsedTime.Before(fourPM), nil
 }
 
-func IsRoundedDollarAmount(input string) (bool, string) {
+func IsRoundedDollarAmount(input string) (bool, error) {
 	number, err := strconv.ParseFloat(input, 64)
-	errorMsg := "Invalid Total Amount"
 	if err != nil {
-		return false, errorMsg
+		customError := models.CustomError {
+			Message: "Invalid Input",
+			DebugMessage: "Cannot parse float",
+			HttpCode: 404,
+		}
+		return false, customError
 	}
-	return number == math.Trunc(number), "" // Checking if the float number is a whole number
+	return number == math.Trunc(number), nil // Checking if the float number is a whole number
 }
 
-func IsMultipleOfQuarter(input string) (bool, string) {
+func IsMultipleOfQuarter(input string) (bool, error) {
 	num, err := strconv.ParseFloat(input, 64)
-	errorMsg := "Invalid Total Amount"
 	if err != nil {
-		return false, errorMsg
+		customError := models.CustomError {
+			Message: "Invalid Input",
+			DebugMessage: "Cannot parse float",
+			HttpCode: 404,
+		}
+		return false, customError
 	}
 	numInt := int(num * 100) 
-  return numInt%25 == 0, ""
+  return numInt%25 == 0, nil
 }
 
 func CountAlphanumeric(input string) int {
@@ -49,16 +61,25 @@ func CountAlphanumeric(input string) int {
 	return count
 }
 
-func GetDayFromDate(date string) (int, string)  {
+func GetDayFromDate(date string) (int, error)  {
 	dateComponents := strings.Split(date, "-") // Splitting date components
-	errorMsg := "Invalid Total Amount"
 	if len(dateComponents) != 3{
-		return -1, errorMsg
+		customError := models.CustomError {
+			Message: "Invalid Input",
+			DebugMessage: "Cannot parse float",
+			HttpCode: 404,
+		}
+		return -1, customError
 	}
 	day, err := strconv.Atoi(dateComponents[2])
 	if err != nil {
-		fmt.Println("Caught")
-		return -1, errorMsg
+		customError := models.CustomError {
+			Message: "Invalid Input",
+			DebugMessage: "Cannot parse float",
+			HttpCode: 404,
+		}
+		return -1, customError
+		
 	} 
-	return day, ""
+	return day, nil
 }

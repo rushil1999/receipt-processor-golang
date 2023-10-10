@@ -15,8 +15,13 @@ func GetAllReceipts(c *gin.Context) { // Controller to get all receipts
 func AddReceipt(c *gin.Context) { // Controller to add a receipt
 	var newReceipt models.Receipt
 	if err := c.ShouldBindJSON(&newReceipt); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+		customError := models.CustomError {
+			Message: "Bad Input Provided",
+			DebugMessage: "Unable to parse the json input",
+			HttpCode: 404,
+		}
+		sendCustomErrorResponse(c, customError)
+		return
 	}
 	newReceipt.ID = uuid.New().String() // Generates new id for every receipt
 	newReceipt.Points = -1
@@ -25,11 +30,11 @@ func AddReceipt(c *gin.Context) { // Controller to add a receipt
 }
 
 
-func GetReceiptPointsById(c *gin.Context) { // Controller to get points for a receipt
+func GetReceiptPointsById(c *gin.Context)  { // Controller to get points for a receipt
 	var id = c.Param("id")
-	receipt, _, errorString := helpers.GetReceiptById(id) // Getting the receipt from ID
-	if(errorString != ""){
-		sendErrorResponse(c, errorString) // Returing error is ID is invalid
+	receipt, _, err := helpers.GetReceiptById(id) // Getting the receipt from ID
+	if err != nil{
+		sendCustomErrorResponse(c, err) // Returing error is ID is invalid
 		return
 	} 
 	if(receipt.Points > 0) { // Checking if the points for the receipt are already claculated to save re-calculation
@@ -38,8 +43,8 @@ func GetReceiptPointsById(c *gin.Context) { // Controller to get points for a re
 	}
 	
 	totalPoints, errorString := helpers.CalculateReceiptPoints(receipt)
-	if errorString != "" {
-		sendErrorResponse(c, errorString)
+	if errorString != nil {
+		sendCustomErrorResponse(c, errorString)
 		return
 	}
 	receipt.Points = totalPoints
@@ -49,6 +54,20 @@ func GetReceiptPointsById(c *gin.Context) { // Controller to get points for a re
 func sendErrorResponse(c *gin.Context, message string){
 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": message}) // Sending error response based on error received
 }
+func sendCustomErrorResponse(c * gin.Context, err error) {
+	customError := err.(models.CustomError)
+	c.IndentedJSON(customError.HttpCode, gin.H{"error": customError.Message})
+}
+
+func GetReceiptById(c *gin.Context) {
+	receiptId := c.Param("id")
+	receipt, _, err := helpers.GetReceiptById(receiptId)
+	if err != nil {
+		sendCustomErrorResponse(c, err)
+		return
+	}
+	c.IndentedJSON(200, receipt)  
+}
 
 func UpdateReceipt(c *gin.Context) { // Controller to update the receipt
 	var updatedReceipt models.Receipt
@@ -57,8 +76,8 @@ func UpdateReceipt(c *gin.Context) { // Controller to update the receipt
 			return
 	}
 	receipt, err := helpers.UpdateReceipt(updatedReceipt)
-	if err != "" 	{
-		sendErrorResponse(c, err)
+	if err != nil 	{
+		sendCustomErrorResponse(c, err)
 	}
 	c.IndentedJSON(http.StatusCreated, receipt)
 

@@ -1,23 +1,26 @@
 package helpers
 
 import (
-	"fmt"
 	"receipt-processor-module/models"
 	"math"
 	"strconv"
 	"strings"
 )
 
-func GetReceiptById(id string) (models.Receipt, int, string) {
-	errorMsg := "Receipt not found"
+func GetReceiptById(id string) (models.Receipt, int, error) {
 	receipts := models.Receipts
 	for i, receipt := range(receipts) {
 		if receiptId := receipt.ID; receiptId == id {
-			return receipt, i, ""
+			return receipt, i, nil
 		}
 	}
 	var emptyReceipt models.Receipt
-	return emptyReceipt, -1, errorMsg
+	var errorInstance = models.CustomError {
+		Message: "Resource not found",
+		DebugMessage: "Receipt not found",
+		HttpCode: 404,
+	}
+	return emptyReceipt, -1, errorInstance
 }
 
 func GetItemPoints(items []models.Item) int { 
@@ -33,47 +36,47 @@ func GetItemPoints(items []models.Item) int {
 	return totalPoints
 }
 
-func CalculateReceiptPoints(receipt models.Receipt) (int, string) {
+func CalculateReceiptPoints(receipt models.Receipt) (int, error) {
 	totalPoints := 5*(len(receipt.Items)/2) // Adding points for receipts pairs
 	totalPoints += CountAlphanumeric(receipt.Retailer) // Counting alphanumeric characters
-	isRoundedDollarAmount, errorString := IsRoundedDollarAmount(receipt.Total)
-	if errorString != "" {
-		return -1, errorString
+	isRoundedDollarAmount, err := IsRoundedDollarAmount(receipt.Total)
+	if err != nil {
+		return -1, err
 	}
 	if isRoundedDollarAmount { // Checking if the amount is rounded and adding points accordingly
 		totalPoints += 50 
 	}
-	isMultipleOfQuarter, errorString := IsMultipleOfQuarter(receipt.Total)
-	if errorString != "" {
-		return -1, errorString
+	isMultipleOfQuarter, err := IsMultipleOfQuarter(receipt.Total)
+	if err != nil {
+		return -1, err
 	}
 	if isMultipleOfQuarter{
 		totalPoints += 25
 	}
-	day, errorString := GetDayFromDate(receipt.PurchaseDate) //Getting Day from YYYY-MM-DD format
-	if(errorString !=  ""){
-		return -1, errorString
+	day, err := GetDayFromDate(receipt.PurchaseDate) //Getting Day from YYYY-MM-DD format
+	if(err != nil){
+		return -1, err
 	}
 	if(day % 2 ==1){
 		totalPoints += 6
 	}
-	isTimeBetween2And4PM, errorString := IsTimeBetween2And4PM(receipt.PurchaseTime)
-	if errorString != "" {
-		return -1, errorString
+	isTimeBetween2And4PM, err := IsTimeBetween2And4PM(receipt.PurchaseTime)
+	if err != nil {
+		return -1, err
 	}
 	if isTimeBetween2And4PM {
 		totalPoints += 10
 	}
 	totalPoints += GetItemPoints(receipt.Items)
-	return totalPoints, ""
+	return totalPoints, nil
 }
 
 
-func UpdateReceipt(updatedReceipt models.Receipt) (models.Receipt, string) {
+func UpdateReceipt(updatedReceipt models.Receipt) (models.Receipt, error) {
 	receipt, index, err := GetReceiptById(updatedReceipt.ID)
 	var emptyReceipt models.Receipt
-	if err != "" {
-		return emptyReceipt, "Receipt not found" 
+	if err != nil {
+		return emptyReceipt, err
 	}
 	receipt.Retailer = updatedReceipt.Retailer
 	receipt.PurchaseDate = updatedReceipt.PurchaseDate
@@ -81,10 +84,10 @@ func UpdateReceipt(updatedReceipt models.Receipt) (models.Receipt, string) {
 	receipt.Items = updatedReceipt.Items
 	receipt.Total = updatedReceipt.Total
 	newReceiptPoints, err := CalculateReceiptPoints(receipt)
-	if err != "" {
-		return emptyReceipt, "invalid receipt"
+	if err != nil {
+		return emptyReceipt, err
 	}
 	receipt.Points = newReceiptPoints
 	models.Receipts[index] = receipt
-	return receipt, ""
+	return receipt, nil
 }
