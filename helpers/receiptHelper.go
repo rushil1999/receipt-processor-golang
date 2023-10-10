@@ -23,17 +23,25 @@ func GetReceiptById(id string) (models.Receipt, int, error) {
 	return emptyReceipt, -1, errorInstance
 }
 
-func GetItemPoints(items []models.Item) int { 
+func GetItemPoints(items []models.Item) (int, error) { 
 	totalPoints := 0
 	for _, item := range items { // Looping through all the items to get the points
 		trimmedDescription := strings.TrimSpace(item.ShortDescription)
 		if len(trimmedDescription) % 3 ==0{
-			itemPrice, _ := strconv.ParseFloat(item.Price, 64)
+			itemPrice, err := strconv.ParseFloat(item.Price, 64)
+			if err != nil {
+				customError := models.CustomError {
+					Message: "Invalid price",
+					DebugMessage: "cannot parse invalid number to float",
+					HttpCode: 400,
+				}
+				return -1, customError
+			}
 			points := math.Ceil(itemPrice*0.2)
 			totalPoints += int(points) 
 		}
 	}
-	return totalPoints
+	return totalPoints, nil
 }
 
 func CalculateReceiptPoints(receipt models.Receipt) (int, error) {
@@ -67,7 +75,11 @@ func CalculateReceiptPoints(receipt models.Receipt) (int, error) {
 	if isTimeBetween2And4PM {
 		totalPoints += 10
 	}
-	totalPoints += GetItemPoints(receipt.Items)
+	itemPoints, err := GetItemPoints(receipt.Items)
+	if err != nil {
+		return -1, err
+	}
+	totalPoints += itemPoints
 	return totalPoints, nil
 }
 

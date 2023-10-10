@@ -42,9 +42,9 @@ func GetReceiptPointsById(c *gin.Context)  { // Controller to get points for a r
 		return
 	}
 	
-	totalPoints, errorString := helpers.CalculateReceiptPoints(receipt)
-	if errorString != nil {
-		sendCustomErrorResponse(c, errorString)
+	totalPoints, err := helpers.CalculateReceiptPoints(receipt)
+	if err != nil {
+		sendCustomErrorResponse(c, err)
 		return
 	}
 	receipt.Points = totalPoints

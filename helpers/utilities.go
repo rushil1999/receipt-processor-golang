@@ -15,7 +15,7 @@ func IsTimeBetween2And4PM(inputTimeStr string) (bool, error) {
 		customError := models.CustomError {
 			Message: "Invalid Input",
 			DebugMessage: "Cannot parse float",
-			HttpCode: 404,
+			HttpCode: 400,
 		}
 		return false, customError
 	}
@@ -30,7 +30,7 @@ func IsRoundedDollarAmount(input string) (bool, error) {
 		customError := models.CustomError {
 			Message: "Invalid Input",
 			DebugMessage: "Cannot parse float",
-			HttpCode: 404,
+			HttpCode: 400,
 		}
 		return false, customError
 	}
@@ -43,7 +43,7 @@ func IsMultipleOfQuarter(input string) (bool, error) {
 		customError := models.CustomError {
 			Message: "Invalid Input",
 			DebugMessage: "Cannot parse float",
-			HttpCode: 404,
+			HttpCode: 400,
 		}
 		return false, customError
 	}
@@ -67,7 +67,7 @@ func GetDayFromDate(date string) (int, error)  {
 		customError := models.CustomError {
 			Message: "Invalid Input",
 			DebugMessage: "Cannot parse float",
-			HttpCode: 404,
+			HttpCode: 400,
 		}
 		return -1, customError
 	}
@@ -76,7 +76,7 @@ func GetDayFromDate(date string) (int, error)  {
 		customError := models.CustomError {
 			Message: "Invalid Input",
 			DebugMessage: "Cannot parse float",
-			HttpCode: 404,
+			HttpCode: 400,
 		}
 		return -1, customError
 		
