@@ -27,7 +27,7 @@ func AddReceipt(c *gin.Context) { // Controller to add a receipt
 
 func GetReceiptPointsById(c *gin.Context) { // Controller to get points for a receipt
 	var id = c.Param("id")
-	receipt, errorString := helpers.GetReceiptById(id, models.Receipts) // Getting the receipt from ID
+	receipt, _, errorString := helpers.GetReceiptById(id) // Getting the receipt from ID
 	if(errorString != ""){
 		sendErrorResponse(c, errorString) // Returing error is ID is invalid
 		return
@@ -48,4 +48,18 @@ func GetReceiptPointsById(c *gin.Context) { // Controller to get points for a re
 
 func sendErrorResponse(c *gin.Context, message string){
 	c.IndentedJSON(http.StatusBadRequest, gin.H{"error": message}) // Sending error response based on error received
+}
+
+func UpdateReceipt(c *gin.Context) { // Controller to update the receipt
+	var updatedReceipt models.Receipt
+	if err:= c.ShouldBindJSON(&updatedReceipt); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+	}
+	receipt, err := helpers.UpdateReceipt(updatedReceipt)
+	if err != "" 	{
+		sendErrorResponse(c, err)
+	}
+	c.IndentedJSON(http.StatusCreated, receipt)
+
 }

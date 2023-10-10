@@ -8,16 +8,16 @@ import (
 	"strings"
 )
 
-func GetReceiptById(id string, receipts []models.Receipt) (models.Receipt, string) {
-	errorMsg := "Invalid Receipt Id"
-	for _, receipt := range(receipts){ // Looping through all the receipts to get the receipt with give ID
-		fmt.Println(receipt) 
-		if id == receipt.ID {
-			return receipt, ""
+func GetReceiptById(id string) (models.Receipt, int, string) {
+	errorMsg := "Receipt not found"
+	receipts := models.Receipts
+	for i, receipt := range(receipts) {
+		if receiptId := receipt.ID; receiptId == id {
+			return receipt, i, ""
 		}
 	}
-	var emptyStruct models.Receipt
-	return emptyStruct, errorMsg
+	var emptyReceipt models.Receipt
+	return emptyReceipt, -1, errorMsg
 }
 
 func GetItemPoints(items []models.Item) int { 
@@ -66,4 +66,25 @@ func CalculateReceiptPoints(receipt models.Receipt) (int, string) {
 	}
 	totalPoints += GetItemPoints(receipt.Items)
 	return totalPoints, ""
+}
+
+
+func UpdateReceipt(updatedReceipt models.Receipt) (models.Receipt, string) {
+	receipt, index, err := GetReceiptById(updatedReceipt.ID)
+	var emptyReceipt models.Receipt
+	if err != "" {
+		return emptyReceipt, "Receipt not found" 
+	}
+	receipt.Retailer = updatedReceipt.Retailer
+	receipt.PurchaseDate = updatedReceipt.PurchaseDate
+	receipt.PurchaseTime = updatedReceipt.PurchaseTime
+	receipt.Items = updatedReceipt.Items
+	receipt.Total = updatedReceipt.Total
+	newReceiptPoints, err := CalculateReceiptPoints(receipt)
+	if err != "" {
+		return emptyReceipt, "invalid receipt"
+	}
+	receipt.Points = newReceiptPoints
+	models.Receipts[index] = receipt
+	return receipt, ""
 }
