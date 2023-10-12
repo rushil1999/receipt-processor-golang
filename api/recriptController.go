@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/google/uuid"
 	"receipt-processor-module/models"
 	"receipt-processor-module/helpers"
 )
@@ -23,10 +22,17 @@ func AddReceipt(c *gin.Context) { // Controller to add a receipt
 		sendCustomErrorResponse(c, customError)
 		return
 	}
-	newReceipt.ID = uuid.New().String() // Generates new id for every receipt
-	newReceipt.Points = -1
-	models.Receipts = append(models.Receipts, newReceipt)
-	c.JSON(http.StatusCreated, gin.H{"id": newReceipt.ID})
+	newReceiptId, err := helpers.AddReceipt(newReceipt)
+	if err != nil {
+		customError := models.CustomError {
+			Message: "Internal Server Error",
+			DebugMessage: "Could not create receipt",
+			HttpCode: 500,
+		}
+		sendCustomErrorResponse(c, customError)
+		return	
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": newReceiptId})
 }
 
 

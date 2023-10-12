@@ -10,3 +10,4 @@ type CustomError struct {
 func (e CustomError) Error() string { // Implementing the error interface
 	return e.Message
 }
+

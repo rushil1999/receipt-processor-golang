@@ -5,10 +5,11 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"github.com/google/uuid"
 )
 
 func GetReceiptById(id string) (models.Receipt, int, error) {
-	receipts := models.Receipts
+	receipts := models.Receipts 
 	for i, receipt := range(receipts) {
 		if receiptId := receipt.ID; receiptId == id {
 			return receipt, i, nil
@@ -20,7 +21,15 @@ func GetReceiptById(id string) (models.Receipt, int, error) {
 		DebugMessage: "Receipt not found",
 		HttpCode: 404,
 	}
+	// log.Println("Receipt fetch with id: %s", receipt.ID)
 	return emptyReceipt, -1, errorInstance
+}
+
+func AddReceipt(receipt models.Receipt) (string, error) {
+	receipt.ID = uuid.New().String() // Generates new id for every receipt
+	receipt.Points = -1
+	models.Receipts = append(models.Receipts, receipt)
+	return receipt.ID, nil
 }
 
 
