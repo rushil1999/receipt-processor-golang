@@ -1,7 +1,9 @@
-package helpers
+package receiptService
 
 import (
-	"receipt-processor-module/models"
+	"receipt-processor-module/pkg/models"
+	"receipt-processor-module/app/services"
+	"receipt-processor-module/app/services/externalService"
 	"math"
 	"strconv"
 	"strings"
@@ -26,9 +28,14 @@ func GetReceiptById(id string) (models.Receipt, int, error) {
 }
 
 func AddReceipt(receipt models.Receipt) (string, error) {
+	err := isReceiptValid(receipt)
+	if err != nil {
+		return "", err
+	}
 	receipt.ID = uuid.New().String() // Generates new id for every receipt
 	receipt.Points = -1
 	models.Receipts = append(models.Receipts, receipt)
+	externalService.GetExternalApiResponse(receipt)
 	return receipt.ID, nil
 }
 
@@ -51,34 +58,49 @@ func GetItemPoints(items []models.Item) (int, error) {
 			totalPoints += int(points) 
 		}
 	}
+	if isItemDuplicated(items) == false {
+		totalPoints += len(items)*5
+	}
 	return totalPoints, nil
+}
+
+func isItemDuplicated(items []models.Item) (bool) {
+	itemsMap := make(map[string]bool)
+	for _, item := range items {
+		if itemsMap[item.ShortDescription] == true {
+			return true
+		} else {
+			itemsMap[item.ShortDescription] = true	
+		}
+	}
+	return false
 }
 
 func CalculateReceiptPoints(receipt models.Receipt) (int, error) {
 	totalPoints := 5*(len(receipt.Items)/2) // Adding points for receipts pairs
-	totalPoints += CountAlphanumeric(receipt.Retailer) // Counting alphanumeric characters
-	isRoundedDollarAmount, err := IsRoundedDollarAmount(receipt.Total)
+	totalPoints += services.CountAlphanumeric(receipt.Retailer) // Counting alphanumeric characters
+	isRoundedDollarAmount, err := services.IsRoundedDollarAmount(receipt.Total)
 	if err != nil {
 		return -1, err
 	}
 	if isRoundedDollarAmount { // Checking if the amount is rounded and adding points accordingly
 		totalPoints += 50 
 	}
-	isMultipleOfQuarter, err := IsMultipleOfQuarter(receipt.Total)
+	isMultipleOfQuarter, err := services.IsMultipleOfQuarter(receipt.Total)
 	if err != nil {
 		return -1, err
 	}
 	if isMultipleOfQuarter{
 		totalPoints += 25
 	}
-	day, err := GetDayFromDate(receipt.PurchaseDate) //Getting Day from YYYY-MM-DD format
-	if(err != nil){
+	day, err := services.GetDayFromDate(receipt.PurchaseDate) //Getting Day from YYYY-MM-DD format
+	if err != nil {
 		return -1, err
 	}
 	if(day % 2 ==1){
 		totalPoints += 6
 	}
-	isTimeBetween2And4PM, err := IsTimeBetween2And4PM(receipt.PurchaseTime)
+	isTimeBetween2And4PM, err := services.IsTimeBetween2And4PM(receipt.PurchaseTime)
 	if err != nil {
 		return -1, err
 	}

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"receipt-processor-module/api"
+	"receipt-processor-module/app/api"
 	// "log"
 )
 

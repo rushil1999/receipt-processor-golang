@@ -1,4 +1,4 @@
-package helpers
+package services
 
 import (
 	"unicode"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 	"math"
-	"receipt-processor-module/models"
+	"receipt-processor-module/pkg/models"
 )
 
 func IsTimeBetween2And4PM(inputTimeStr string) (bool, error) {
@@ -82,4 +82,19 @@ func GetDayFromDate(date string) (int, error)  {
 		
 	} 
 	return day, nil
+}
+
+func IsEmpty(input string) bool {
+	if len(input) == 0 {
+		return true
+	} 
+	return false
+}
+
+func isValidDate(date string) bool {
+	return true
+}
+
+func isTimeValue(time string) bool {
+	return true
 }

@@ -3,8 +3,8 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"receipt-processor-module/models"
-	"receipt-processor-module/helpers"
+	"receipt-processor-module/pkg/models"
+	"receipt-processor-module/app/services/receiptService"
 )
 
 func GetAllReceipts(c *gin.Context) { // Controller to get all receipts
@@ -22,14 +22,9 @@ func AddReceipt(c *gin.Context) { // Controller to add a receipt
 		sendCustomErrorResponse(c, customError)
 		return
 	}
-	newReceiptId, err := helpers.AddReceipt(newReceipt)
+	newReceiptId, err := receiptService.AddReceipt(newReceipt)
 	if err != nil {
-		customError := models.CustomError {
-			Message: "Internal Server Error",
-			DebugMessage: "Could not create receipt",
-			HttpCode: 500,
-		}
-		sendCustomErrorResponse(c, customError)
+		sendCustomErrorResponse(c, err)
 		return	
 	}
 	c.JSON(http.StatusCreated, gin.H{"id": newReceiptId})
@@ -38,7 +33,7 @@ func AddReceipt(c *gin.Context) { // Controller to add a receipt
 
 func GetReceiptPointsById(c *gin.Context)  { // Controller to get points for a receipt
 	var id = c.Param("id")
-	receipt, _, err := helpers.GetReceiptById(id) // Getting the receipt from ID
+	receipt, _, err := receiptService.GetReceiptById(id) // Getting the receipt from ID
 	if err != nil{
 		sendCustomErrorResponse(c, err) // Returing error is ID is invalid
 		return
@@ -48,7 +43,7 @@ func GetReceiptPointsById(c *gin.Context)  { // Controller to get points for a r
 		return
 	}
 	
-	totalPoints, err := helpers.CalculateReceiptPoints(receipt)
+	totalPoints, err := receiptService.CalculateReceiptPoints(receipt)
 	if err != nil {
 		sendCustomErrorResponse(c, err)
 		return
@@ -60,7 +55,7 @@ func GetReceiptPointsById(c *gin.Context)  { // Controller to get points for a r
 
 func GetReceiptById(c *gin.Context) {
 	receiptId := c.Param("id")
-	receipt, _, err := helpers.GetReceiptById(receiptId)
+	receipt, _, err := receiptService.GetReceiptById(receiptId)
 	if err != nil {
 		sendCustomErrorResponse(c, err)
 		return
@@ -74,7 +69,7 @@ func UpdateReceipt(c *gin.Context) { // Controller to update the receipt
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 	}
-	receipt, err := helpers.UpdateReceipt(updatedReceipt)
+	receipt, err := receiptService.UpdateReceipt(updatedReceipt)
 	if err != nil 	{
 		sendCustomErrorResponse(c, err)
 	}
@@ -84,7 +79,7 @@ func UpdateReceipt(c *gin.Context) { // Controller to update the receipt
 
 func DeleteReceipt(c * gin.Context) {
 	id := c.Param("id")
-	deletedReceiptId, err := helpers.DeleteReceipt(id)
+	deletedReceiptId, err := receiptService.DeleteReceipt(id)
 	if err != nil {
 		sendCustomErrorResponse(c, err)
 		return

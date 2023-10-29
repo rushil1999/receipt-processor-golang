@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"receipt-processor-module/models"
+	"receipt-processor-module/pkg/models"
 )
 
 
