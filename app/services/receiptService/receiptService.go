@@ -4,6 +4,7 @@ import (
 	"receipt-processor-module/pkg/models"
 	"receipt-processor-module/app/services"
 	"receipt-processor-module/app/services/externalService"
+	// "receipt-processor-module/app/services/mongoDBService"
 	"math"
 	"strconv"
 	"strings"
@@ -36,6 +37,7 @@ func AddReceipt(receipt models.Receipt) (string, error) {
 	receipt.Points = -1
 	models.Receipts = append(models.Receipts, receipt)
 	externalService.GetExternalApiResponse(receipt)
+	// mongoDBService.AddReceiptToMongoDB(receipt)
 	return receipt.ID, nil
 }
 

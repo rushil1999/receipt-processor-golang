@@ -2,7 +2,7 @@
 
 # Entry point for your application
 [build]
-  cmd = "main"
+  cmd = "cmd"
 
 # Watch these file extensions for changes
 # Add any other file extensions or directories you want to monitor

@@ -3,16 +3,18 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"receipt-processor-module/app/api"
+	"receipt-processor-module/app/middlewares"
 
-	"receipt-processor-module/pkg/database"
+	// "receipt-processor-module/pkg/database"
 	// "log"
 )
 
 func main() {
 
-	database.InitMongoDBConnection()
+	// database.InitMongoDBConnection()
 	
 	router := gin.Default()
+	router.Use(middlewares.LogApiRequests())
 	api.ImportRoutes(router)
 	router.Run("localhost:8000")
 }
